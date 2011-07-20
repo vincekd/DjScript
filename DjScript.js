@@ -95,6 +95,8 @@ function DateJs ( format, date ) {
 	};
     })(date);
 
+    if ( format == "" ) return d;
+
     fArr.forEach ( function (s) {
 	output += ( s.search( reg ) != -1 ) ? d[s]() : s;
     });
