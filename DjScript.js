@@ -1,5 +1,5 @@
 "use strict";
-function date ( format, date ) {
+function date ( format, date, ret ) {
     var b = /(-|ago|last|previous|prev|past|former|minus|subtract|sub){1,}/;
     var f = /(\+|hence|next|coming|future|add|plus){1,}/;
     var mArr = ["January","Febuary","March","April","May","June","July","August","September","October","November","December"];
@@ -11,33 +11,22 @@ function date ( format, date ) {
 	return m;
     })(date.getFullYear());
     
-    var d = (function( da ){
+    var dj = (function( da ){
 	return { 
-	    "d" : function () {
-		return (da.getDate() < 10) ? "" + "0" + da.getDate() : da.getDate();
-	    },
-	    "D" : function () {
-		return dayArr[da.getDay()].substr(0,3);
-	    },
-	    "j" : function () {
-		return da.getDate();
-	    },
-	    "l" : function () {
-		return dayArr[da.getDay()];
-	    },
-	    "N" : function () {
-		return da.getDay() + 1;
-	    },
-	    "w" : function () {
-		return da.getDay();
-	    },
-	    "z" : function () {
+	    "d" : (da.getDate() < 10) ? "" + "0" + da.getDate() : da.getDate(),
+	    "D" : dayArr[da.getDay()].substr(0,3),
+	    "j" : da.getDate(),
+	    "l" : dayArr[da.getDay()],
+	    "N" : da.getDay() + 1,
+	    "L" : getLeap ( da.getFullYear() ),
+	    "w" : da.getDay(),
+	    "z" : (function(){
 		var days = 0;
 		for( var i = 0; i < da.getMonth(); i++ )
 		    days += mDays[i];
 		return days + da.getDate() - 1;
-	    },
-	    "W" : function () {
+	    })(),
+	    "W" : (function() {
 		var dd = new Date ();
 		dd.setFullYear ( da.getFullYear(), da.getMonth(), da.getDate() );
 		var x = dd.getDay();
@@ -46,76 +35,64 @@ function date ( format, date ) {
 		var x = dd.getFullYear();
 		var z = Math.floor ( ( dd.getTime() - new Date( x, 0, 1, -6) ) / 86400000 );
 		return 1 + Math.floor ( z / 7 );
+	    })(),
+	    "F" : mArr[da.getMonth()],
+	    "m" : (da.getMonth()+1 < 10) ? "" + "0" + (da.getMonth() + 1): da.getMonth() + 1,
+	    "f" : da.getMonth(),
+	    "M" : mArr[da.getMonth()].substr(0,3),
+	    "n" : da.getMonth() + 1,
+	    "t" : mDays[da.getMonth()],
+	    "Y" : da.getFullYear(),
+	    "y" : ("" + da.getFullYear()).substr(-2),
+	    "a" : (da.getHours() < 12) ? "am" : "pm",
+	    "A" : (da.getHours() < 12) ? "AM" : "PM",
+	    "g" : (da.getHours() % 12 == 0) ? 12 : da.getHours() % 12,
+	    "G" : da.getHours(),
+	    "h" : (function(){
+		var u = (da.getHours() % 12 == 0) ? 12 : da.getHours() % 12;
+		return ( u < 10 ) ? "" + "0" + u : u;
+	    })(),
+	    "H" : (da.getHours < 10) ? "" + "0" + da.getHours() : da.getHours(),
+	    "i" : (da.getMinutes() < 10) ? "" + "0" + da.getMinutes() : da.getMinutes(),
+	    "s" : (da.getSeconds() < 10) ? "" + "0" + da.getSeconds() : da.getSeconds(),
+	    "u" : da.getMilliseconds(),
+	    "c" : da.toString(),
+	    "U" : da.getTime(),
+	    "compareTo" : function ( dt ) {
+		dt = window.date( null, dt, true );
+		if ( Math.abs ( dt.getTime() - da.getTime() ) < 1000 ) 
+		    return 0;
+		else if ( dt.getTime() > da.getTime() ) 
+		    return -1;
+		else 
+		    return 1;
 	    },
-	    "F" : function () {
-		return mArr[da.getMonth()];
-	    },
-	    "m" : function () {
-		return (da.getMonth()+1 < 10) ? "" + "0" + (da.getMonth() + 1): da.getMonth() + 1;
-	    },
-	    "f" : function () {
-		return da.getMonth();
-	    },
-	    "M" : function () {
-		return mArr[da.getMonth()].substr(0,3);
-	    },
-	    "n" : function () {
-		return da.getMonth() + 1;
-	    },
-	    "t" : function () {
-		return mDays[da.getMonth()];
-	    },
-	    "Y" : function () {
-		return da.getFullYear();
-	    },
-	    "y" : function () {
-		return ("" + da.getFullYear()).substr(-2);
-	    },
-	    "a" : function () {
-		return (da.getHours() < 12) ? "am" : "pm";
-	    },
-	    "A" : function () {
-		return (da.getHours() < 12) ? "AM" : "PM";
-	    },
-	    "g" : function () {
-		return  (da.getHours() % 12 == 0) ? 12 : da.getHours() % 12;
-	    },
-	    "G" : function () {
-		return da.getHours();
-	    },
-	    "h" : function () {
-		return  (this.g() < 10 ) ? "" + "0" + this.g() : this.g();
-	    },
-	    "H" : function () {
-		return (da.getHours < 10) ? "" + "0" + da.getHours() : da.getHours();
-	    },
-	    "i" : function () {
-		return (da.getMinutes() < 10) ? "" + "0" + da.getMinutes() : da.getMinutes();
-	    },
-	    "s" : function () {
-		return (da.getSeconds() < 10) ? "" + "0" + da.getSeconds() : da.getSeconds();
-	    },
-	    "u" : function () {
-		return da.getMilliseconds();
-	    },
-	    "c" : function () {
-		return da.toString();
-	    },
-	    "U" : function () {
-		return da.getTime();
-	    }
+	    "P" : (function() {
+		var metric = [ 'seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years' ];
+		var meter = [ 60, 60, 24, 7, 4, 12 ];
+		var d = new Date();
+		var comp = Math.round ( Math.abs ( d.getTime() - da.getTime() ) / 1000 );
+		var str = "hence";
+		if ( d.getTime() > da.getTime() )
+		    str = "ago";
+		var i = 0;
+		while ( comp >= meter[i] ){
+		    comp = comp / meter[i];
+		    i++;
+		}
+		return "" + Math.round( comp ) + " " + metric[i] + " " + str;
+	    })()
 	};
     })(date);
 
-    if ( format == "" ) return d;
+    if ( ret == true ) return date;
+    else if ( format == "" || format == null ) return dj;
 
-    var output = "";
-    var reg = /[a-zA-Z]/;
-    var fArr = format.split( "" );
+    var output = "", reg = /[a-zA-Z]/, fArr = format.split( "" );
 
     for ( var i = 0; i < fArr.length; i++ ){
 	if ( fArr[i] == "\\" ) output += fArr[++i];
-	else output += ( booS ( fArr[i], reg ) ) ? d[fArr[i]]() : fArr[i];
+	else output += ( booS ( fArr[i], reg ) ) ? dj[fArr[i]] : fArr[i];
     }
 
     return output;
@@ -123,18 +100,7 @@ function date ( format, date ) {
     function parseDate ( s ){
 	s = trim ( s );
 	s = s.toLowerCase();
-	var date = new Date ();
-	var d = /[^a-zA-Z]days?/;
-	var w = /weeks?/;
-	var m = /months?/;
-	var y = /years?/;
-	var h = /hours?/;
-	var min = /mins?/;
-	var sec = /secs?(?!o)/;
-	var milli = /millis?/;
-	var yest = /yest/;
-	var tom = /tom/;
-	var n;
+	var date = new Date (), d = /[^a-zA-Z]days?/, w = /weeks?/, m = /months?/, y = /years?/, h = /hours?/, min = /mins?/, sec = /secs?(?!o)/, milli = /millis?/, yest = /yest/, tom = /tom/, n;
 
 	date = mdNames ( s );
 	
@@ -176,10 +142,11 @@ function date ( format, date ) {
     };
     function extNum ( s ) {
 	var i = ( s.search ( f ) == -1 ) ? s.search ( b ) : s.search( f );
-	s = s.substr ( i );
-	s = s.slice ( s.search ( /[0-9]{1,}/ ) );
-	var d = s.search ( /[a-zA-Z\s]/ );
-	return (d == -1) ? s : s.substring ( 0, d );
+	var st = s.substr ( i );
+	st = st.slice ( st.search ( /[0-9]{1,}/ ) );
+	if ( st == -1 ) st = st.slice ( s.search ( /[0-9]{1,}/ ) );
+	var d = st.search ( /[a-zA-Z\s]/ );
+	return (d == -1) ? st : st.substring ( 0, d );
     };
     function booS ( h, s ) {
 	if ( typeof s == "string" || s instanceof RegExp ) return h.search( s ) != -1;
@@ -258,13 +225,12 @@ function date ( format, date ) {
     function parseMore ( s ) {
 	s = " " + s + " ";
 	var date = new Date();
-	var pun = /[.,_\/-]/;
 	var reg = /[0-9]\s?[(am)(pm)]/;
-	var hm = /\s([0-9]{1,2}):([0-9]{2}):?([0-9]{0,2})?\s{0,}(am|pm)?\s/;
+	var hm = /\s([0-9]{1,2}):([0-9]{2}):{0,1}([0-9]{2}){0,1}(am|pm)?\s/;
 	var my = /([0-9]{1,2})[.,_\/-]([0-9]{4})/;
-	var ymd = /([0-9]{4})[.,_\/-]([0-1]?[0-9]{1})[.,_\/-]([0-3]{0,1}[0-9]{1})/;
+	var ymd = /([0-9]{4})[.,_\/-]{0,1}([0-1]{1}[0-9]{1})[.,_\/-]{0,1}([0-3]{1}[0-9]{1})/;
 	var dmy = /([0-3]{0,1}[0-9]{1})[.,_\/-]([0-1]?[0-9]{1})[.,_\/-]([0-9]{4})/;
-	var yyd = /([0-9]{4})[.,_\/-]?([0-9]{3})/;
+	var yyd = /\s([0-9]{4})[.,_\/-]?([0-9]{3})\s/;
 	var y = /\s([0-9]{4})\s/;
 	var e = /([0-9]{9,})/;
 
@@ -273,7 +239,7 @@ function date ( format, date ) {
 		p1 = parseInt ( p1 );
 		if ( p1 < 12 ) p1 += 12;
 	    }
-	    if ( p3 == "" ) p3 = 0;
+	    if ( p3 == "" || p3 == undefined ) p3 = 0;
 	    date.setHours ( p1 );
 	    date.setMinutes ( p2 );
 	    date.setSeconds ( p3 );
@@ -297,17 +263,16 @@ function date ( format, date ) {
 		    count += mCount[i];
 		    i++;
 		}
-		var c = (p2-count < 10 ) ? ""+"0"+(p2-count) : (p2-count);
 		date.setFullYear ( p1 );
-		date.setMonth ( (i+1) );
-		date.setDate( c );
+		date.setMonth ( i );
+		date.setDate( (p2 - count) );
 	    });
 	} else if ( booS ( s, y ) ) {
 	    s.replace ( y, function ( str, p1, offset, s ) {
 		date.setFullYear ( p1 );
 	    });
 	}else if ( booS ( s, e ) ) {
-	    date = new Date ( Date.parse ( s ) );
+	    date = new Date ( parseInt ( s ) );
 	}
 	function yMD ( str, p1, p2, p3, offset, s ) {
 	    date.setFullYear ( p1 );
