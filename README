@@ -1,0 +1,5 @@
+DjScript is a date library for javascript that makes the formatting and parsing of date strings much easier.  It almost exactly like the php function "date()", taking the same arguments and using the same formatting syntax, with additions.
+
+The first argument is the format, e.g. "Y_m_d" would yield "2011_07_25".  The full commands can be gotten from my website at http://vdumas.org/projects/djscript.php .  The second argument can either be a javascript Date object, or a string you want parsed into a Date object and then formatted.  I've supported every common date string I could think of, but if you need others let me know.
+
+Alternatively, you can pass in null or an empty string for the first argument and get a parser object returned.  This allows you to call the date() function once for any particular date once and simply pass around the object whose variable are the various formatting letters.
