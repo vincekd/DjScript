@@ -1,15 +1,16 @@
 "use strict";
-function date ( format, date, ret ) {
+function date ( format, dat, ret ) {
+
     var b = /(-|ago|last|previous|prev|past|former|minus|subtract|sub){1,}/;
     var f = /(\+|hence|next|coming|future|add|plus){1,}/;
     var mArr = ["January","Febuary","March","April","May","June","July","August","September","October","November","December"];
     var dayArr = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-    date = ( typeof date == "string" ) ? parseDate ( date ) : date;
+    dat = ( typeof dat == "string" ) ? parseDate ( dat ) : dat;
     var mDays = (function(year){
 	var m = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 	m[1] = ( getLeap ( year ) ) ? 29 : 28;
 	return m;
-    })(date.getFullYear());
+    })(dat.getFullYear());
     
     var dj = (function( da ){
 	return { 
@@ -59,7 +60,7 @@ function date ( format, date, ret ) {
 	    "c" : da.toString(),
 	    "U" : da.getTime(),
 	    "compareTo" : function ( dt ) {
-		dt = window.date( null, dt, true );
+		dt = date( "", dt, true );
 		if ( Math.abs ( dt.getTime() - da.getTime() ) < 1000 ) 
 		    return 0;
 		else if ( dt.getTime() > da.getTime() ) 
@@ -83,16 +84,16 @@ function date ( format, date, ret ) {
 		return "" + Math.round( comp ) + " " + metric[i] + " " + str;
 	    })()
 	};
-    })(date);
+    })(dat);
 
-    if ( ret == true ) return date;
+    if ( ret == true ) return dat;
     else if ( format == "" || format == null ) return dj;
 
     var output = "", reg = /[a-zA-Z]/, fArr = format.split( "" );
 
     for ( var i = 0; i < fArr.length; i++ ){
 	if ( fArr[i] == "\\" ) output += fArr[++i];
-	else output += ( booS ( fArr[i], reg ) ) ? dj[fArr[i]] : fArr[i];
+	else output += ( reg.test( fArr[i] ) ) ? dj[fArr[i]] : fArr[i];
     }
 
     return output;
@@ -104,38 +105,37 @@ function date ( format, date, ret ) {
 
 	date = mdNames ( s );
 	
-	if ( booS ( s, yest ) )
+	if ( yest.test( s ) )
 	    date.setDate(date.getDate()-1);
-	else if ( booS ( s, tom ) )
+	else if ( tom.test( s ) )
 	    date.setDate(date.getDate()+1);
 
-	if ( booS ( s, b ) ) {
+	if ( b.test( s ) ) {
 	    n = extNum ( s );
 	    n = (n == "") ? -1 : (n-(n*2));
-	} else if ( booS( s, f ) ) {
-	    n = extNum ( s );
-	    if ( n == "" ) n = 1;
+	} else if ( f.test( s ) ) {
+	    n = extNum ( s ) || 1;
 	} else {
 	    return date;
 	}
 	
 	n = parseInt(n);
 
-	if ( booS ( s, d ) )
+	if ( d.test( s ) )
 	    date.setDate ( date.getDate() + n );
-	else if ( booS ( s, m ) )
+	else if ( m.test( s ) )
 	    date.setMonth ( date.getMonth() + n );
-	else if ( booS ( s, y ) )
+	else if ( y.test ( s ) )
 	    date.setFullYear ( date.getFullYear() + n );
-	else if ( booS ( s, w ) )
+	else if ( w.test ( s ) )
 	    date.setDate ( date.getDate() + (n*7) );
-	else if ( booS ( s, h ) )
+	else if ( h.test ( s ) )
 	    date.setHours ( date.getHours() + n );
-	else if ( booS ( s, min ) )
+	else if ( min.test ( s ) )
 	    date.setMinutes( date.getMinutes() + n );
-	else if ( booS ( s, sec ) )
+	else if ( sec.test( s ) )
 	    date.setSeconds ( date.getSeconds() + n );
-	else if ( booS ( s, milli ) )
+	else if ( milli.test ( s ) )
 	    date.setMilliseconds( date.getMilliseconds() + n );
 
 	return date;
@@ -172,15 +172,15 @@ function date ( format, date, ret ) {
 	    } else {
 		return "";
 	    }
-	}) );
+	}));
 
 	var date = parseMore ( std );
 
 	for ( var i = 0; i < mArr.length; i++ ) {
 	    if ( booS ( s, mArr[i].substr ( 0, 3 ).toLowerCase() ) ) {
-		if ( date.getMonth () >= i && booS ( s, f ) ) {
+		if ( date.getMonth () >= i && f.test ( f ) ) {
 		    date.setFullYear( date.getFullYear() + 1 );
-		} else if ( date.getMonth() <= i && booS ( s, b ) ) {
+		} else if ( date.getMonth() <= i && b.test (s ) ) {
 		    date.setFullYear( date.getFullYear() - 1 );
 		}
 		date.setMonth ( i );
@@ -188,10 +188,10 @@ function date ( format, date, ret ) {
 	}
 
 	for ( var i = 0; i < dayArr.length; i++ ) {
-	    if ( booS ( s, /mon(?!t)/ ) || ! booS ( s, /mon/ ) ) {
+	    if ( /mon(?!t)/.test( s ) || ! /mon/.test( s ) ) {
 		if ( booS ( s, dayArr[i].substr ( 0, 3 ).toLowerCase() ) ) {
 		    var j = date.getDay ();
-		    if ( booS ( s, f ) ) {
+		    if ( f.test( s ) ) {
 			if ( i > j ) {
 			    date.setDate ( date.getDate() + (i - j) );
 			} else if ( i < j ) {
@@ -199,7 +199,7 @@ function date ( format, date, ret ) {
 			} else if ( i == j ) {
 			    date.setDate ( date.getDate () + 7 );
 			}
-		    } else if ( booS ( s, b ) ) {
+		    } else if ( b.test ( s ) ) {
 			if ( i > j ) {
 			    date.setDate ( date.getDate() - ((7 - i) + j) );
 			} else if ( i < j ) {
@@ -227,33 +227,45 @@ function date ( format, date, ret ) {
 	var date = new Date();
 	var reg = /[0-9]\s?[(am)(pm)]/;
 	var hm = /\s([0-9]{1,2}):([0-9]{2}):{0,1}([0-9]{2}){0,1}(am|pm)?\s/;
-	var my = /([0-9]{1,2})[.,_\/-]([0-9]{4})/;
-	var ymd = /([0-9]{4})[.,_\/-]{0,1}([0-1]{1}[0-9]{1})[.,_\/-]{0,1}([0-3]{1}[0-9]{1})/;
-	var dmy = /([0-3]{0,1}[0-9]{1})[.,_\/-]([0-1]?[0-9]{1})[.,_\/-]([0-9]{4})/;
+	var my = /\s([0-9]{1,2})[.,_\/-]{0,1}([0-9]{4})\s/;
+	var ymd = /\s([0-9]{4})[.,_\/-]{1}([0-9]{2})[.,_\/-]{1}([0-9]{2})\s/;
+	var ymd2 = /\s([0-9]{4})[.,_\/-]{1}([0-9]{1,2})[.,_\/-]{1}([0-9]{1,2})\s/;
+	var ymd3 = /\s([0-9]{4})([0-9]{2})([0-9]{2})\s/;
+	var dmy = /\s([0-3]{0,1}[0-9]{1})[.,_\/-]([0-1]?[0-9]{1})[.,_\/-]([0-9]{4})\s/;
 	var yyd = /\s([0-9]{4})[.,_\/-]?([0-9]{3})\s/;
 	var y = /\s([0-9]{4})\s/;
-	var e = /([0-9]{9,})/;
+	var e = /\s([0-9]{4}[.,\/-]{0,}[0-9]{3})\s/;
+	var ep = /\s([0-9]{9,})\s/;
 
 	s.replace ( hm, function(str, p1, p2, p3, p4, offset, s){
-	    if ( booS ( s, /pm/ ) ) {
+	    if ( /pm/.test ( s ) ) {
 		p1 = parseInt ( p1 );
 		if ( p1 < 12 ) p1 += 12;
 	    }
-	    if ( p3 == "" || p3 == undefined ) p3 = 0;
+	    p3 = p3 || 0;
 	    date.setHours ( p1 );
 	    date.setMinutes ( p2 );
 	    date.setSeconds ( p3 );
 	});
-	if ( booS ( s, ymd ) ) {
+	if ( ep.test ( s ) ) {
+	    s.replace ( ep, function ( str, p1, offset, s ) {
+		date = new Date ( parseInt ( p1 ) );
+	    });
+	}
+	if ( ymd.test ( s ) ) {
 	    s.replace ( ymd, yMD );
-	} else if ( booS ( s, dmy ) ) {
+	} else if ( ymd2.test ( s ) ) {
+	    s.replace ( ymd2, yMD );
+	} else if ( ymd3.test ( s ) ) {
+	    s.replace ( ymd3, yMD );
+	}else if ( dmy.test ( s ) ) {
 	    s.replace ( dmy, dMY );
-	} else if ( booS ( s, my ) ) {
+	} else if ( my.test ( s ) ) {
 	    s.replace ( my, function (str, p1, p2, offset, s ){
 		date.setFullYear ( p2 );
-		date.setMonth ( p1 );
+		date.setMonth ( p1-1 );
 	    });
-	} else if ( booS ( s, yyd ) ) {
+	} else if ( yyd.test ( s ) ) {
 	    s.replace ( yyd, function ( str, p1, p2, offset, s ) {
 		var mCount = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 		mCount[1] = ( getLeap(p1) ) ? 29 : 28;
@@ -267,11 +279,11 @@ function date ( format, date, ret ) {
 		date.setMonth ( i );
 		date.setDate( (p2 - count) );
 	    });
-	} else if ( booS ( s, y ) ) {
+	} else if ( y.test ( s ) ) {
 	    s.replace ( y, function ( str, p1, offset, s ) {
 		date.setFullYear ( p1 );
 	    });
-	}else if ( booS ( s, e ) ) {
+	}else if ( e.test ( s ) ) {
 	    date = new Date ( parseInt ( s ) );
 	}
 	function yMD ( str, p1, p2, p3, offset, s ) {
@@ -290,3 +302,6 @@ function date ( format, date, ret ) {
 	return (new Date(year,1,29).getDate() != 1);
     };
 };
+try {
+    exports.date = date;
+} catch ( e ) {}
